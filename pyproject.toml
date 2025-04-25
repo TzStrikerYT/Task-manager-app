@@ -1,0 +1,29 @@
+[tool.poetry]
+name = "flask-hex-app"
+version = "0.1.0"
+description = "Flask application with Hexagonal architecture"
+authors = ["User"]
+readme = "README.md"
+packages = [{include = "app"}]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+flask = "^2.2.3"
+psycopg2-binary = "^2.9.5"
+python-dotenv = "^1.0.0"
+flask-sqlalchemy = "^3.0.3"
+flask-jwt-extended = "^4.4.4"
+passlib = "^1.7.4"
+bcrypt = "^4.0.1"
+flask-cors = "^4.0.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.3.1"
+pytest-flask = "^1.2.0"
+pytest-mock = "^3.10.0"
+pytest-cov = "^4.1.0"
+PyJWT = "^2.6.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api" 

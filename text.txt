@@ -1,0 +1,14 @@
+Necesito crear una aplicacion de Flask en un contenedor de docker junto con una Base de datos postgres, estadebe estar conectada a la base de datos, por el momento puede haber unicamente un endpoint que diga hello world, esta aplicacion debe cumplir con la arquitectura Hexagonal
+
+
+Para un Sistema de Gestión de Tareas Avanzado, la arquitectura hexagonal sería más apropiada por estas razones:
+
+1. **Aislamiento de la lógica de negocio**: La arquitectura hexagonal mantiene las reglas de negocio (gestión de tareas, asignaciones, estados) independientes de la infraestructura, permitiendo cambiar bases de datos o interfaces sin afectar el núcleo.
+
+2. **Adaptabilidad**: Al ser un sistema "avanzado" para equipos técnicos, probablemente tenga integración con múltiples sistemas (calendarios, notificaciones, métricas) que se pueden implementar como adaptadores.
+
+3. **Testabilidad**: Permite probar la lógica de negocio sin dependencias externas.
+
+4. **Evolución**: Facilita añadir funcionalidades como API móvil, CLI o integraciones sin modificar el núcleo.
+
+MVC funcionaría para un gestor simple, pero la arquitectura hexagonal ofrece mejor mantenibilidad y adaptabilidad para sistemas complejos con muchas interacciones externas.

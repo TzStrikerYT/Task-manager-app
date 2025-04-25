@@ -1,0 +1,508 @@
+# API Documentation - Flask Hexagonal Architecture App
+
+## CORS
+
+Esta API tiene habilitado CORS (Cross-Origin Resource Sharing), lo que permite que se acceda a ella desde dominios diferentes, como tu aplicación frontend en otro puerto. No es necesario configurar nada especial en el cliente para manejar CORS.
+
+## Autenticación
+
+### Login
+- **URL**: `/auth/login`
+- **Método**: POST
+- **Headers**: Content-Type: application/json
+- **Request Body**:
+```json
+{
+  "email": "usuario@ejemplo.com",
+  "password": "contraseña123"
+}
+```
+- **Successful Response (200 OK)**:
+```json
+{
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "user": {
+    "id": 1,
+    "name": "Usuario Ejemplo",
+    "email": "usuario@ejemplo.com",
+    "role": "Desarrollador"
+  }
+}
+```
+- **Error Response (401 Unauthorized)**:
+```json
+{
+  "error": "Invalid email or password"
+}
+```
+
+### Refresh Token
+- **URL**: `/auth/refresh`
+- **Método**: POST
+- **Headers**: 
+  - Content-Type: application/json
+  - Authorization: Bearer {refresh_token}
+- **Request Body**: None
+- **Successful Response (200 OK)**:
+```json
+{
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
+```
+- **Error Response (401 Unauthorized)**:
+```json
+{
+  "error": "User not found"
+}
+```
+
+## Usuarios
+
+### Crear Usuario
+- **URL**: `/users`
+- **Método**: POST
+- **Headers**: Content-Type: application/json
+- **Request Body**:
+```json
+{
+  "name": "Nuevo Usuario",
+  "email": "nuevo@ejemplo.com",
+  "password": "contraseña123",
+  "role": "Desarrollador"
+}
+```
+- **Successful Response (201 Created)**:
+```json
+{
+  "id": 2,
+  "name": "Nuevo Usuario",
+  "email": "nuevo@ejemplo.com",
+  "role": "Desarrollador"
+}
+```
+- **Error Response (400 Bad Request)**:
+```json
+{
+  "error": "User with email nuevo@ejemplo.com already exists"
+}
+```
+
+### Obtener Lista de Usuarios
+- **URL**: `/users`
+- **Método**: GET
+- **Headers**: Authorization: Bearer {access_token}
+- **Query Params** (opcionales):
+  - role: "Desarrollador", "Líder Técnico", "Administrador"
+  - search: término para buscar por nombre o email
+- **Successful Response (200 OK)**:
+```json
+[
+  {
+    "id": 1,
+    "name": "Usuario Ejemplo",
+    "email": "usuario@ejemplo.com",
+    "role": "Desarrollador"
+  },
+  {
+    "id": 2,
+    "name": "Nuevo Usuario",
+    "email": "nuevo@ejemplo.com",
+    "role": "Desarrollador"
+  }
+]
+```
+
+### Obtener Usuario por ID
+- **URL**: `/users/{id}`
+- **Método**: GET
+- **Headers**: Authorization: Bearer {access_token}
+- **Successful Response (200 OK)**:
+```json
+{
+  "id": 1,
+  "name": "Usuario Ejemplo",
+  "email": "usuario@ejemplo.com",
+  "role": "Desarrollador"
+}
+```
+- **Error Response (404 Not Found)**:
+```json
+{
+  "error": "User with ID 999 not found"
+}
+```
+
+### Actualizar Usuario
+- **URL**: `/users/{id}`
+- **Método**: PUT
+- **Headers**: 
+  - Content-Type: application/json
+  - Authorization: Bearer {access_token}
+- **Request Body**:
+```json
+{
+  "name": "Juan Pérez Actualizado",
+  "email": "juan.nuevo@ejemplo.com",
+  "role": "Administrador"
+}
+```
+- **Nota**: Todos los campos son opcionales, pero al menos uno debe ser proporcionado.
+- **Successful Response (200 OK)**:
+```json
+{
+  "id": 1,
+  "name": "Juan Pérez Actualizado",
+  "email": "juan.nuevo@ejemplo.com",
+  "role": "Administrador"
+}
+```
+- **Error Response (400 Bad Request)**:
+```json
+{
+  "error": "User with email juan.nuevo@ejemplo.com already exists"
+}
+```
+
+## Tareas
+
+### Crear Tarea
+- **URL**: `/tasks`
+- **Método**: POST
+- **Headers**: 
+  - Content-Type: application/json
+  - Authorization: Bearer {access_token}
+- **Request Body**:
+```json
+{
+  "title": "Implementar módulo de autenticación",
+  "description": "Crear sistema de login y registro con JWT para la aplicación móvil",
+  "priority": "Alta",
+  "due_date": "2024-05-15T18:00:00",
+  "assigned_user_ids": [1, 2]
+}
+```
+- **Successful Response (201 Created)**:
+```json
+{
+  "id": 1,
+  "title": "Implementar módulo de autenticación",
+  "description": "Crear sistema de login y registro con JWT para la aplicación móvil",
+  "status": "Pendiente",
+  "priority": "Alta",
+  "created_at": "2024-04-25T10:00:00",
+  "updated_at": "2024-04-25T10:00:00",
+  "due_date": "2024-05-15T18:00:00",
+  "creator_id": 1,
+  "assigned_users": [
+    {
+      "id": 1,
+      "name": "Usuario Ejemplo",
+      "email": "usuario@ejemplo.com",
+      "role": "Desarrollador"
+    },
+    {
+      "id": 2,
+      "name": "Nuevo Usuario",
+      "email": "nuevo@ejemplo.com",
+      "role": "Desarrollador"
+    }
+  ]
+}
+```
+- **Error Response (400 Bad Request)**:
+```json
+{
+  "error": "Title, description, and priority are required"
+}
+```
+
+### Obtener Lista de Tareas
+- **URL**: `/tasks`
+- **Método**: GET
+- **Headers**: Authorization: Bearer {access_token}
+- **Query Params** (opcionales):
+  - status: "Pendiente", "En Progreso", "Bloqueada", "En Revisión", "Completada"
+  - priority: "Baja", "Media", "Alta", "Urgente"
+  - user_id: ID del usuario asignado
+  - due_date: Fecha en formato ISO
+- **Successful Response (200 OK)**:
+```json
+[
+  {
+    "id": 1,
+    "title": "Implementar módulo de autenticación",
+    "description": "Crear sistema de login y registro con JWT para la aplicación móvil",
+    "status": "Pendiente",
+    "priority": "Alta",
+    "created_at": "2024-04-25T10:00:00",
+    "updated_at": "2024-04-25T10:00:00",
+    "due_date": "2024-05-15T18:00:00",
+    "creator_id": 1,
+    "assigned_users": [
+      {
+        "id": 1,
+        "name": "Usuario Ejemplo",
+        "email": "usuario@ejemplo.com",
+        "role": "Desarrollador"
+      },
+      {
+        "id": 2,
+        "name": "Nuevo Usuario",
+        "email": "nuevo@ejemplo.com",
+        "role": "Desarrollador"
+      }
+    ]
+  }
+]
+```
+
+### Obtener Tarea por ID
+- **URL**: `/tasks/{id}`
+- **Método**: GET
+- **Headers**: Authorization: Bearer {access_token}
+- **Successful Response (200 OK)**:
+```json
+{
+  "id": 1,
+  "title": "Implementar módulo de autenticación",
+  "description": "Crear sistema de login y registro con JWT para la aplicación móvil",
+  "status": "Pendiente",
+  "priority": "Alta",
+  "created_at": "2024-04-25T10:00:00",
+  "updated_at": "2024-04-25T10:00:00",
+  "due_date": "2024-05-15T18:00:00",
+  "creator_id": 1,
+  "assigned_users": [
+    {
+      "id": 1,
+      "name": "Usuario Ejemplo",
+      "email": "usuario@ejemplo.com",
+      "role": "Desarrollador"
+    },
+    {
+      "id": 2,
+      "name": "Nuevo Usuario",
+      "email": "nuevo@ejemplo.com",
+      "role": "Desarrollador"
+    }
+  ]
+}
+```
+- **Error Response (404 Not Found)**:
+```json
+{
+  "error": "Task with ID 999 not found"
+}
+```
+
+### Actualizar Estado de Tarea
+- **URL**: `/tasks/{id}/status`
+- **Método**: PUT
+- **Headers**: 
+  - Content-Type: application/json
+  - Authorization: Bearer {access_token}
+- **Request Body**:
+```json
+{
+  "status": "En Progreso"
+}
+```
+- **Successful Response (200 OK)**:
+```json
+{
+  "id": 1,
+  "title": "Implementar módulo de autenticación",
+  "description": "Crear sistema de login y registro con JWT para la aplicación móvil",
+  "status": "En Progreso",
+  "priority": "Alta",
+  "created_at": "2024-04-25T10:00:00",
+  "updated_at": "2024-04-25T10:30:00",
+  "due_date": "2024-05-15T18:00:00",
+  "creator_id": 1,
+  "assigned_users": [
+    {
+      "id": 1,
+      "name": "Usuario Ejemplo",
+      "email": "usuario@ejemplo.com",
+      "role": "Desarrollador"
+    },
+    {
+      "id": 2,
+      "name": "Nuevo Usuario",
+      "email": "nuevo@ejemplo.com",
+      "role": "Desarrollador"
+    }
+  ]
+}
+```
+- **Error Response (400 Bad Request)**:
+```json
+{
+  "error": "You don't have permission to update this task"
+}
+```
+
+### Actualizar Prioridad de Tarea
+- **URL**: `/tasks/{id}/priority`
+- **Método**: PUT
+- **Headers**: 
+  - Content-Type: application/json
+  - Authorization: Bearer {access_token}
+- **Request Body**:
+```json
+{
+  "priority": "Urgente"
+}
+```
+- **Successful Response (200 OK)**:
+```json
+{
+  "id": 1,
+  "title": "Implementar módulo de autenticación",
+  "description": "Crear sistema de login y registro con JWT para la aplicación móvil",
+  "status": "En Progreso",
+  "priority": "Urgente",
+  "created_at": "2024-04-25T10:00:00",
+  "updated_at": "2024-04-25T11:00:00",
+  "due_date": "2024-05-15T18:00:00",
+  "creator_id": 1,
+  "assigned_users": [
+    {
+      "id": 1,
+      "name": "Usuario Ejemplo",
+      "email": "usuario@ejemplo.com",
+      "role": "Desarrollador"
+    },
+    {
+      "id": 2,
+      "name": "Nuevo Usuario",
+      "email": "nuevo@ejemplo.com",
+      "role": "Desarrollador"
+    }
+  ]
+}
+```
+- **Error Response (400 Bad Request)**:
+```json
+{
+  "error": "You don't have permission to update this task's priority"
+}
+```
+
+### Asignar Usuario a Tarea
+- **URL**: `/tasks/{task_id}/assign/{user_id}`
+- **Método**: POST
+- **Headers**: Authorization: Bearer {access_token}
+- **Request Body**: None
+- **Successful Response (200 OK)**:
+```json
+{
+  "id": 1,
+  "title": "Implementar módulo de autenticación",
+  "description": "Crear sistema de login y registro con JWT para la aplicación móvil",
+  "status": "En Progreso",
+  "priority": "Urgente",
+  "created_at": "2024-04-25T10:00:00",
+  "updated_at": "2024-04-25T11:30:00",
+  "due_date": "2024-05-15T18:00:00",
+  "creator_id": 1,
+  "assigned_users": [
+    {
+      "id": 1,
+      "name": "Usuario Ejemplo",
+      "email": "usuario@ejemplo.com",
+      "role": "Desarrollador"
+    },
+    {
+      "id": 2,
+      "name": "Nuevo Usuario",
+      "email": "nuevo@ejemplo.com",
+      "role": "Desarrollador"
+    },
+    {
+      "id": 3,
+      "name": "Tercer Usuario",
+      "email": "tercero@ejemplo.com",
+      "role": "Desarrollador"
+    }
+  ]
+}
+```
+- **Error Response (400 Bad Request)**:
+```json
+{
+  "error": "You don't have permission to assign users to this task"
+}
+```
+
+### Desasignar Usuario de Tarea
+- **URL**: `/tasks/{task_id}/unassign/{user_id}`
+- **Método**: DELETE
+- **Headers**: Authorization: Bearer {access_token}
+- **Request Body**: None
+- **Successful Response (200 OK)**:
+```json
+{
+  "id": 1,
+  "title": "Implementar módulo de autenticación",
+  "description": "Crear sistema de login y registro con JWT para la aplicación móvil",
+  "status": "En Progreso",
+  "priority": "Urgente",
+  "created_at": "2024-04-25T10:00:00",
+  "updated_at": "2024-04-25T12:00:00",
+  "due_date": "2024-05-15T18:00:00",
+  "creator_id": 1,
+  "assigned_users": [
+    {
+      "id": 1,
+      "name": "Usuario Ejemplo",
+      "email": "usuario@ejemplo.com",
+      "role": "Desarrollador"
+    },
+    {
+      "id": 3,
+      "name": "Tercer Usuario",
+      "email": "tercero@ejemplo.com",
+      "role": "Desarrollador"
+    }
+  ]
+}
+```
+- **Error Response (400 Bad Request)**:
+```json
+{
+  "error": "You don't have permission to unassign users from this task"
+}
+```
+
+## Notas sobre seguridad y permisos
+
+- Todos los endpoints de tareas y usuarios requieren autenticación JWT.
+- El acceso a tareas completadas está restringido según el rol:
+  - Líderes Técnicos y Administradores pueden ver todas las tareas completadas.
+  - Desarrolladores solo pueden ver tareas completadas en las que están asignados.
+- Solo los creadores de tareas, administradores y líderes técnicos pueden cambiar prioridades.
+- Solo usuarios asignados, creadores, administradores y líderes técnicos pueden actualizar estados.
+- Los tokens de acceso expiran después de 1 hora.
+- Los tokens de refresco expiran después de 30 días.
+
+## Valores posibles para enumeraciones
+
+### Roles de usuario
+- Desarrollador
+- Líder Técnico
+- Administrador
+
+### Estados de tarea
+- Pendiente
+- En Progreso
+- Bloqueada
+- En Revisión
+- Completada
+
+### Prioridades de tarea
+- Baja
+- Media
+- Alta
+- Urgente 
