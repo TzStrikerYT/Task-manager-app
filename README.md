@@ -33,8 +33,12 @@ El proyecto incluye un frontend desarrollado en Vue.js ubicado en la carpeta `ta
 
 ## Configuración
 1. Clonar este repositorio
-2. Ejecutar con Docker Compose:
-
+2. Crear un archivo `.env` basado en `.env.example` con las variables de entorno necesarias:
+   ```
+   DATABASE_URL=postgresql://postgres:postgres@db:5432/flask_app
+   SECRET_KEY=mi-clave-secreta
+   ```
+3. Ejecutar con Docker Compose:
    ```
    docker compose build
    docker compose up
